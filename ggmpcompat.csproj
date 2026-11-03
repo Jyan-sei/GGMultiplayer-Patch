@@ -1,0 +1,111 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <AssemblyName>ggmpcompat</AssemblyName>
+    <RootNamespace>GunsawGenetics</RootNamespace>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>$(MSBuildThisFileDirectory)bin\</OutputPath>
+    <IntermediateOutputPath>$(MSBuildThisFileDirectory)obj\</IntermediateOutputPath>
+    <!-- Together / LiteNetLib are netstandard2.1; force the game's netstandard facade. -->
+    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.3" PrivateAssets="all" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TogetherDll Condition="'$(TogetherDll)' == '' and Exists('$(MSBuildThisFileDirectory)..\..\MultiplayerModSource\build\Together\CasualtiesMP.dll')">$(MSBuildThisFileDirectory)..\..\MultiplayerModSource\build\Together\CasualtiesMP.dll</TogetherDll>
+    <TogetherDll Condition="'$(TogetherDll)' == '' and Exists('C:\Program Files (x86)\Steam\steamapps\common\Casualties Unknown Demo\BepInEx\plugins\Together\CasualtiesMP.dll')">C:\Program Files (x86)\Steam\steamapps\common\Casualties Unknown Demo\BepInEx\plugins\Together\CasualtiesMP.dll</TogetherDll>
+    <LiteNetLibDll Condition="Exists('$(MSBuildThisFileDirectory)..\..\MultiplayerModSource\libs\dlls\LiteNetLib.dll')">$(MSBuildThisFileDirectory)..\..\MultiplayerModSource\libs\dlls\LiteNetLib.dll</LiteNetLibDll>
+    <LiteNetLibDll Condition="'$(LiteNetLibDll)' == '' and Exists('C:\Program Files (x86)\Steam\steamapps\common\Casualties Unknown Demo\BepInEx\plugins\Together\LiteNetLib.dll')">C:\Program Files (x86)\Steam\steamapps\common\Casualties Unknown Demo\BepInEx\plugins\Together\LiteNetLib.dll</LiteNetLibDll>
+    <GgPack>$(MSBuildThisFileDirectory)..\..\ExternalPlugins\Gunsaw Genetics v2.0.0 324 2.0.0 2026-10-04T16-20Z tPLKDsvpZ</GgPack>
+    <GameManaged>$(MSBuildThisFileDirectory)..\..\MultiplayerModSource\GameManaged</GameManaged>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="mscorlib">
+      <HintPath>$(GameManaged)\mscorlib.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="netstandard">
+      <HintPath>$(GameManaged)\netstandard.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="System">
+      <HintPath>$(GameManaged)\System.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="System.Core">
+      <HintPath>$(GameManaged)\System.Core.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="BepInEx">
+      <HintPath>..\..\libs\BepInEx\BepInEx.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>..\..\libs\BepInEx\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="CasualtiesMP">
+      <HintPath>$(TogetherDll)</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="LiteNetLib">
+      <HintPath>$(LiteNetLibDll)</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="LiteEntitySystem">
+      <HintPath>..\..\MultiplayerModSource\libs\dlls\LiteEntitySystem.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <!-- Publicize: GG InternalsVisibleTo only lists stock assembly name GunsawGeneticsMPBridge. -->
+    <Reference Include="GunsawGenetics" Publicize="true">
+      <HintPath>$(GgPack)\GunsawGenetics.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="body_sprite_replacer">
+      <HintPath>$(GgPack)\body_sprite_replacer.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>$(GameManaged)\Newtonsoft.Json.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\..\libs\GameManaged\Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>..\..\libs\GameManaged\UnityEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>..\..\libs\GameManaged\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\..\libs\GameManaged\UnityEngine.UI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.Physics2DModule">
+      <HintPath>..\..\libs\GameManaged\UnityEngine.Physics2DModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>..\..\libs\GameManaged\UnityEngine.InputLegacyModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AudioModule">
+      <HintPath>..\..\libs\GameManaged\UnityEngine.AudioModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="CopyPluginToPluginsRoot" AfterTargets="Build">
+    <Copy SourceFiles="$(OutputPath)ggmpcompat.dll" DestinationFolder="$(MSBuildThisFileDirectory)" SkipUnchangedFiles="true" />
+  </Target>
+</Project>
