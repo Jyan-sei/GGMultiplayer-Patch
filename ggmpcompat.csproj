@@ -1,6 +1,6 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <LangVersion>latest</LangVersion>
     <Nullable>disable</Nullable>
     <AssemblyName>ggmpcompat</AssemblyName>
@@ -46,6 +46,18 @@
       <HintPath>..\..\libs\BepInEx\BepInEx.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="MonoMod.RuntimeDetour">
+      <HintPath>..\..\libs\BepInEx\MonoMod.RuntimeDetour.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="MonoMod.Utils">
+      <HintPath>..\..\libs\BepInEx\MonoMod.Utils.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Mono.Cecil">
+      <HintPath>..\..\libs\BepInEx\Mono.Cecil.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="0Harmony">
       <HintPath>..\..\libs\BepInEx\0Harmony.dll</HintPath>
       <Private>false</Private>
@@ -67,9 +79,14 @@
       <HintPath>$(GgPack)\GunsawGenetics.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="body_sprite_replacer">
+    <Reference Include="body_sprite_replacer" Publicize="true">
       <HintPath>$(GgPack)\body_sprite_replacer.dll</HintPath>
       <Private>false</Private>
+    </Reference>
+    <Reference Include="MultiplayerSpriteReplacer" Publicize="true">
+      <HintPath>$(GgPack)\MultiplayerSpriteReplacer.dll</HintPath>
+      <Private>false</Private>
+      <Aliases>mpreplacer</Aliases>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>$(GameManaged)\Newtonsoft.Json.dll</HintPath>

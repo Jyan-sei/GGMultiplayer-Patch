@@ -20,8 +20,8 @@ public static partial class SpeciesMultiplayerSync
 	const string WebSpawnedMsg = "GG.Web.Spawned";
 	const string WebHitMsg = "GG.Web.Hit";
 	const string WebBreakMsg = "GG.Web.Break";
-	const string TalkMsg = "GG.Talk";
-	const string TalkLineMsg = "GG.Talk.Line";
+	//const string TalkMsg = "GG.Talk";
+	//const string TalkLineMsg = "GG.Talk.Line";
 	const string StealMsg = "GG.Steal";
 	const string StealResultMsg = "GG.Steal.Result";
 	const string StealthMsg = "GG.Stealth";
@@ -94,8 +94,8 @@ public static partial class SpeciesMultiplayerSync
 		Multiplayer.RegisterCustomClientReceiver(WebSpawnedMsg, OnClientWebSpawn);
 		Multiplayer.RegisterCustomServerReceiver(WebHitMsg, OnServerWebHit);
 		Multiplayer.RegisterCustomClientReceiver(WebBreakMsg, OnClientWebBreak);
-		Multiplayer.RegisterCustomServerReceiver(TalkMsg, OnServerTalk);
-		Multiplayer.RegisterCustomClientReceiver(TalkLineMsg, OnClientTalk);
+		//Multiplayer.RegisterCustomServerReceiver(TalkMsg, OnServerTalk);
+		//Multiplayer.RegisterCustomClientReceiver(TalkLineMsg, OnClientTalk);
 		Multiplayer.RegisterCustomServerReceiver(StealMsg, OnServerSteal);
 		Multiplayer.RegisterCustomClientReceiver(StealResultMsg, OnClientSteal);
 		Multiplayer.RegisterCustomServerReceiver(StealthMsg, OnServerStealth);
@@ -121,29 +121,29 @@ public static partial class SpeciesMultiplayerSync
 			if (!kv.Value)
 				continue;
 			var writer = Multiplayer.CreateNamedWriter(CloakStateMsg);
-			NetIo.Put(writer, kv.Key);
-			NetIo.Put(writer, true);
+			writer.Put(kv.Key);
+			writer.Put(true);
 			NetIo.ServerSend(writer, plr.playerId);
 		}
 		foreach (var kv in _grapple)
 		{
 			var writer = Multiplayer.CreateNamedWriter(CrystalStateMsg);
-			NetIo.Put(writer, kv.Key);
-			NetIo.Put(writer, true);
-			NetIo.Put(writer, kv.Value.x);
-			NetIo.Put(writer, kv.Value.y);
+			writer.Put(kv.Key);
+			writer.Put(true);
+			writer.Put(kv.Value.x);
+			writer.Put(kv.Value.y);
 			NetIo.ServerSend(writer, plr.playerId);
 		}
 		TraderMp.SendCatchup(plr);
 		foreach (var kv in _webRec)
 		{
 			var writer = Multiplayer.CreateNamedWriter(WebSpawnedMsg);
-			NetIo.Put(writer, kv.Key);
-			NetIo.Put(writer, kv.Value.Point);
-			NetIo.Put(writer, kv.Value.Origin.x);
-			NetIo.Put(writer, kv.Value.Origin.y);
-			NetIo.Put(writer, kv.Value.Landing.x);
-			NetIo.Put(writer, kv.Value.Landing.y);
+			writer.Put(kv.Key);
+			writer.Put(kv.Value.Point);
+			writer.Put(kv.Value.Origin.x);
+			writer.Put(kv.Value.Origin.y);
+			writer.Put(kv.Value.Landing.x);
+			writer.Put(kv.Value.Landing.y);
 			NetIo.ServerSend(writer, plr.playerId);
 		}
 	}
@@ -194,7 +194,7 @@ public static partial class SpeciesMultiplayerSync
 			return;
 		}
 		var writer = Multiplayer.CreateNamedWriter(CloakMsg);
-		NetIo.Put(writer, isCloaked);
+		writer.Put(isCloaked);
 		NetIo.ClientSend(writer);
 	}
 
@@ -213,8 +213,8 @@ public static partial class SpeciesMultiplayerSync
 		if (!Net.IsServer)
 			return;
 		var writer = Multiplayer.CreateNamedWriter(CloakStateMsg);
-		NetIo.Put(writer, netId.id);
-		NetIo.Put(writer, isCloaked);
+		writer.Put(netId.id);
+		writer.Put(isCloaked);
 		NetIo.ServerSend(writer, ServerMain.AllClientIdsExceptHost);
 	}
 
@@ -254,9 +254,9 @@ public static partial class SpeciesMultiplayerSync
 			return;
 		}
 		var writer = Multiplayer.CreateNamedWriter(CrystalMsg);
-		NetIo.Put(writer, isGrappling);
-		NetIo.Put(writer, grapplePoint.x);
-		NetIo.Put(writer, grapplePoint.y);
+		writer.Put(isGrappling);
+		writer.Put(grapplePoint.x);
+		writer.Put(grapplePoint.y);
 		NetIo.ClientSend(writer);
 	}
 
@@ -281,10 +281,10 @@ public static partial class SpeciesMultiplayerSync
 		if (!Net.IsServer)
 			return;
 		var writer = Multiplayer.CreateNamedWriter(CrystalStateMsg);
-		NetIo.Put(writer, netId.id);
-		NetIo.Put(writer, isGrappling);
-		NetIo.Put(writer, point.x);
-		NetIo.Put(writer, point.y);
+		writer.Put(netId.id);
+		writer.Put(isGrappling);
+		writer.Put(point.x);
+		writer.Put(point.y);
 		NetIo.ServerSend(writer, ServerMain.AllClientIdsExceptHost);
 	}
 
@@ -325,11 +325,11 @@ public static partial class SpeciesMultiplayerSync
 			return;
 		}
 		var writer = Multiplayer.CreateNamedWriter(WebSpawnMsg);
-		NetIo.Put(writer, isPointMode);
-		NetIo.Put(writer, origin.x);
-		NetIo.Put(writer, origin.y);
-		NetIo.Put(writer, landingPoint.x);
-		NetIo.Put(writer, landingPoint.y);
+		writer.Put(isPointMode);
+		writer.Put(origin.x);
+		writer.Put(origin.y);
+		writer.Put(landingPoint.x);
+		writer.Put(landingPoint.y);
 		NetIo.ClientSend(writer);
 	}
 
@@ -366,12 +366,12 @@ public static partial class SpeciesMultiplayerSync
 		}
 		owned.Add(id);
 		var writer = Multiplayer.CreateNamedWriter(WebSpawnedMsg);
-		NetIo.Put(writer, id);
-		NetIo.Put(writer, isPointMode);
-		NetIo.Put(writer, origin.x);
-		NetIo.Put(writer, origin.y);
-		NetIo.Put(writer, landing.x);
-		NetIo.Put(writer, landing.y);
+		writer.Put(id);
+		writer.Put(isPointMode);
+		writer.Put(origin.x);
+		writer.Put(origin.y);
+		writer.Put(landing.x);
+		writer.Put(landing.y);
 		NetIo.ServerSend(writer, ServerMain.AllClientIdsExceptHost);
 		MPBridgePlugin.Log?.LogInfo("[GG-MP] web " + id + " owner=" + ownerId.id);
 	}
@@ -412,8 +412,8 @@ public static partial class SpeciesMultiplayerSync
 			return;
 		}
 		var writer = Multiplayer.CreateNamedWriter(WebHitMsg);
-		NetIo.Put(writer, webId);
-		NetIo.Put(writer, si.syncId.id);
+		writer.Put(webId);
+		writer.Put(si.syncId.id);
 		NetIo.ClientSend(writer);
 	}
 
@@ -445,7 +445,7 @@ public static partial class SpeciesMultiplayerSync
 			return;
 		ForgetWeb(webId);
 		var writer = Multiplayer.CreateNamedWriter(WebBreakMsg);
-		NetIo.Put(writer, webId);
+		writer.Put(webId);
 		NetIo.ServerSend(writer, ServerMain.AllClientIdsExceptHost);
 	}
 
@@ -480,7 +480,7 @@ public static partial class SpeciesMultiplayerSync
 		}
 		ForgetWeb(old);
 		var writer = Multiplayer.CreateNamedWriter(WebBreakMsg);
-		NetIo.Put(writer, old);
+		writer.Put(old);
 		NetIo.ServerSend(writer, ServerMain.AllClientIdsExceptHost);
 	}
 
@@ -493,7 +493,7 @@ public static partial class SpeciesMultiplayerSync
 			owned.Remove(webId);
 	}
 
-	internal static void BroadcastTalkerLine(Talker talker, string line)
+	/*internal static void BroadcastTalkerLine(Talker talker, string line)
 	{
 		if (!IsNetworkRunning() || talker == null || talker.body == null || string.IsNullOrEmpty(line))
 			return;
@@ -505,21 +505,21 @@ public static partial class SpeciesMultiplayerSync
 			return;
 		}
 		var writer = Multiplayer.CreateNamedWriter(TalkMsg);
-		NetIo.Put(writer, nb.netId.id);
-		NetIo.Put(writer, line);
+		writer.Put(nb.netId.id);
+		writer.Put(line);
 		NetIo.ClientSend(writer);
-	}
+	}*/
 
-	static void OnServerTalk(ScavPlayer sender, NetDataReader reader)
+	/*static void OnServerTalk(ScavPlayer sender, NetDataReader reader)
 	{
 		ushort id = reader.GetUShort();
 		string line = reader.GetString();
 		if (!TryOwner(sender, out knetid netId, out _) || netId.id != id)
 			return;
 		BroadcastTalk(netId, line);
-	}
+	}*/
 
-	static void BroadcastTalk(knetid netId, string line)
+	/*static void BroadcastTalk(knetid netId, string line)
 	{
 		if (NetBody.TryGetNetBodyFromId(netId, out var nb) && nb != null && nb.body != null && !nb.IsLocal)
 		{
@@ -539,10 +539,10 @@ public static partial class SpeciesMultiplayerSync
 		if (clients.Count == 0)
 			return;
 		var writer = Multiplayer.CreateNamedWriter(TalkLineMsg);
-		NetIo.Put(writer, netId.id);
-		NetIo.Put(writer, line);
+		writer.Put(netId.id);
+		writer.Put(line);
 		NetIo.ServerSend(writer, clients);
-	}
+	}*/
 
 	static void OnClientTalk(NetDataReader reader)
 	{
@@ -621,9 +621,9 @@ public static partial class SpeciesMultiplayerSync
 			return;
 		}
 		var writer = Multiplayer.CreateNamedWriter(StealMsg);
-		NetIo.Put(writer, traderSyncId);
-		NetIo.Put(writer, itemIndex);
-		NetIo.Put(writer, claimedValue);
+		writer.Put(traderSyncId);
+		writer.Put(itemIndex);
+		writer.Put(claimedValue);
 		NetIo.ClientSend(writer);
 	}
 
@@ -680,7 +680,7 @@ public static partial class SpeciesMultiplayerSync
 		else if (plr.playerId.id != 0)
 		{
 			var writer = Multiplayer.CreateNamedWriter(StealResultMsg);
-			NetIo.Put(writer, ok);
+			writer.Put(ok);
 			NetIo.ServerSend(writer, plr.playerId);
 		}
 		MPBridgePlugin.Log?.LogInfo("[GG-MP] voyager steal " + (ok ? "ok" : "fail") + " id=" + plr.GetPersistentId());
@@ -725,9 +725,9 @@ public static partial class SpeciesMultiplayerSync
 			return;
 		}
 		var writer = Multiplayer.CreateNamedWriter(StealthMsg);
-		NetIo.Put(writer, traderSyncId);
-		NetIo.Put(writer, armed);
-		NetIo.Put(writer, unarmedDamage);
+		writer.Put(traderSyncId);
+		writer.Put(armed);
+		writer.Put(unarmedDamage);
 		NetIo.ClientSend(writer);
 	}
 
@@ -791,7 +791,7 @@ public static partial class SpeciesMultiplayerSync
 			return;
 		}
 		var writer = Multiplayer.CreateNamedWriter(CannibalMsg);
-		NetIo.Put(writer, traderSyncId);
+		writer.Put(traderSyncId);
 		NetIo.ClientSend(writer);
 	}
 
@@ -815,7 +815,7 @@ public static partial class SpeciesMultiplayerSync
 			return;
 		}
 		var writer = Multiplayer.CreateNamedWriter(CannibalOkMsg);
-		NetIo.Put(writer, traderSyncId);
+		writer.Put(traderSyncId);
 		NetIo.ServerSend(writer, plr.playerId);
 	}
 
@@ -856,7 +856,7 @@ public static partial class SpeciesMultiplayerSync
 		if (!NetObjectRegistry.TryGetSyncInfo(trader.gameObject, out var si) || si == null)
 			return;
 		var writer = Multiplayer.CreateNamedWriter(BiteMsg);
-		NetIo.Put(writer, si.syncId.id);
+		writer.Put(si.syncId.id);
 		NetIo.ClientSend(writer);
 	}
 
@@ -892,7 +892,7 @@ public static partial class SpeciesMultiplayerSync
 		if (index < 0)
 			return;
 		var writer = Multiplayer.CreateNamedWriter(LimbMsg);
-		NetIo.Put(writer, (ushort)index);
+		writer.Put((ushort)index);
 		NetIo.ClientSend(writer);
 	}
 
@@ -914,7 +914,7 @@ public static partial class SpeciesMultiplayerSync
 		if (plr == null || !Net.IsServer)
 			return;
 		var writer = Multiplayer.CreateNamedWriter(PrideMsg);
-		NetIo.Put(writer, duration);
+		writer.Put(duration);
 		NetIo.ServerSend(writer, plr.playerId);
 	}
 
@@ -930,7 +930,7 @@ public static partial class SpeciesMultiplayerSync
 		if (!IsNetworkRunning() || IsHost())
 			return;
 		var writer = Multiplayer.CreateNamedWriter(RozaMsg);
-		NetIo.Put(writer, holding);
+		writer.Put(holding);
 		NetIo.ClientSend(writer);
 	}
 
@@ -939,7 +939,7 @@ public static partial class SpeciesMultiplayerSync
 		if (!IsNetworkRunning() || IsHost())
 			return;
 		var writer = Multiplayer.CreateNamedWriter(LeapyMsg);
-		NetIo.Put(writer, holding);
+		writer.Put(holding);
 		NetIo.ClientSend(writer);
 	}
 
@@ -948,11 +948,11 @@ public static partial class SpeciesMultiplayerSync
 		if (!IsNetworkRunning() || IsHost())
 			return;
 		var writer = Multiplayer.CreateNamedWriter(LevitateMsg);
-		NetIo.Put(writer, lifting);
-		NetIo.Put(writer, mouse.x);
-		NetIo.Put(writer, mouse.y);
-		NetIo.Put(writer, at.x);
-		NetIo.Put(writer, at.y);
+		writer.Put(lifting);
+		writer.Put(mouse.x);
+		writer.Put(mouse.y);
+		writer.Put(at.x);
+		writer.Put(at.y);
 		NetIo.ClientSend(writer);
 	}
 
@@ -1032,7 +1032,7 @@ public static partial class SpeciesMultiplayerSync
 		if (!IsNetworkRunning() || IsHost())
 			return;
 		var writer = Multiplayer.CreateNamedWriter(AlbinoMsg);
-		NetIo.Put(writer, (byte)Mathf.Clamp(level, 1, 3));
+		writer.Put((byte)Mathf.Clamp(level, 1, 3));
 		NetIo.ClientSend(writer);
 	}
 

@@ -1,6 +1,9 @@
+extern alias mpreplacer;
 using System;
 using BepInEx.Bootstrap;
+using CasualtiesTogetherUtils;
 using HarmonyLib;
+using Together;
 
 namespace GunsawGenetics;
 
@@ -106,60 +109,76 @@ internal static class GgSpecies
 	}
 
 	static bool _replacerLooked;
-	static bool _replacerReady;
-	static Action<Body, int> _setSlot;
-	static Func<int> _getSlot;
-	static Action<int> _setCurrent;
 
-	internal static void NoteReplacer()
+    internal static void NoteReplacer()
 	{
-		EnsureReplacer();
+		// JIT will throw FIleNotFound when attempting to run a method that references an assembly that is not loaded. can be ignored
+		try
+		{
+			loadMSR();
+		}
+		catch (System.IO.FileNotFoundException) { }
+		catch (Exception e)
+		{
+            MPBridgePlugin.Log?.LogError($"[GG-MP] loadMSR threw: {e.Message}");
+        }
+
+		try
+		{
+            loadBSR();
+		}
+		catch (System.IO.FileNotFoundException) { }
+		catch (Exception e)
+		{
+            MPBridgePlugin.Log?.LogError($"[GG-MP] loadBSR threw: {e.Message}");
+        }
 	}
 
-	static void EnsureReplacer()
+	static void loadBSR()
 	{
-		if (_replacerLooked)
-			return;
-		_replacerLooked = true;
-		if (!Chainloader.PluginInfos.ContainsKey("spritereplacer"))
-		{
-			MPBridgePlugin.Log?.LogInfo("[GG-MP] sprite replacer not loaded, skin slots left alone");
-			return;
-		}
-		Type replacer = AccessTools.TypeByName("SpriteReplacerPlugin");
-		if (replacer == null)
-		{
-			MPBridgePlugin.Log?.LogInfo("[GG-MP] sprite replacer listed but its type was not found, skin slots left alone");
-			return;
-		}
-		_setSlot = Calls.Bind<Action<Body, int>>(AccessTools.Method(replacer, "SetBodySlot", new[] { typeof(Body), typeof(int) }));
-		if (_setSlot == null)
-		{
-			MPBridgePlugin.Log?.LogInfo("[GG-MP] sprite replacer has no SetBodySlot, skin slots left alone");
-			return;
-		}
-		var current = replacer.GetProperty("CurrentSlot");
-		if (current != null)
-		{
-			_getSlot = Calls.Bind<Func<int>>(current.GetGetMethod(true));
-			_setCurrent = Calls.Bind<Action<int>>(current.GetSetMethod(true));
-		}
-		_replacerReady = true;
-		MPBridgePlugin.Log?.LogInfo("[GG-MP] sprite replacer hooked");
-	}
+		if (_replacerLooked) return;
+        _replacerLooked = true;
+        SetSpriteSlot = (Action<Body, int, knetid>)bsr_SetSpriteSolt;
+        MPBridgePlugin.Log?.LogDebug($"[GG-MP] Loaded body sprite replacer compat");
+    }
 
-	internal static void SetSpriteSlot(Body body, int slot)
+	static void loadMSR()
 	{
-		if (body == null || slot <= 0)
-			return;
-		EnsureReplacer();
-		if (!_replacerReady)
-			return;
-		// SetBodySlot writes the global CurrentSlot. a remote body must not steal the local one.
-		bool local = PlayerCamera.main != null && PlayerCamera.main.body == body;
-		int previous = _getSlot != null ? _getSlot() : 0;
-		_setSlot(body, slot);
-		if (!local && _setCurrent != null)
-			_setCurrent(previous);
-	}
+        if (_replacerLooked) return;
+        _replacerLooked = true;
+        SetSpriteSlot = (Action<Body, int, knetid>)msr_SetSpriteSlot;
+		MPBridgePlugin.usingMSR = true;
+        MPBridgePlugin.Log?.LogDebug($"[GG-MP] Loaded multiplayer sprite replacer compat");
+    }
+
+	public static Action<Body, int, knetid> SetSpriteSlot = delegate { };
+
+	static void bsr_SetSpriteSolt(Body body, int slot, knetid _)
+	{
+        if (!body || slot <= 0)
+            return;
+        bool local = PlayerCamera.main != null && PlayerCamera.main.body == body;
+		int previous = SpriteReplacerPlugin.CurrentSlot;
+        SpriteReplacerPlugin.SetBodySlot(body, slot);
+        if (!local)
+            SpriteReplacerPlugin.CurrentSlot = previous;
+    }
+
+	static void msr_SetSpriteSlot(Body body, int slot, knetid id)
+	{
+        if (!body || slot <= 0 || body != PlayerCamera.main?.body)
+            return;
+
+		if(SpeciesMultiplayerSync.knownSpeciesNames.TryGetValue(id, out var name))
+		{
+            if (!mpreplacer.SpriteCache.SwitchToSlot($"GG{name}", false) && !mpreplacer.SpriteCache.SwitchToSlot($"st{slot}", false))
+            {
+                MPBridgePlugin.Log?.LogDebug($"[GG-MP] Skin not found for {name}");
+            }
+		}
+		else if(!mpreplacer.SpriteCache.SwitchToSlot($"st{slot}", false))
+		{
+            MPBridgePlugin.Log?.LogDebug($"[GG-MP] Skin not found for {slot}");
+        }
+    }
 }
