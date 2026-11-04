@@ -714,8 +714,8 @@ internal static class OrangeArms
 		if (!Net.IsServer)
 			return;
 		var writer = Multiplayer.CreateNamedWriter(ExtraLimbMsg);
-		NetIo.Put(writer, nb.netId.id);
-		NetIo.Put(writer, (byte)(nb.body.limbs.Length - 15));
+		writer.Put(nb.netId.id);
+		writer.Put((byte)(nb.body.limbs.Length - 15));
 		for (int i = 15; i < nb.body.limbs.Length; i++)
 			WriteLimb(writer, nb.body.limbs[i]);
 		NetIo.ServerSend(writer, ServerMain.AllClientIdsExceptHost);
@@ -732,17 +732,17 @@ internal static class OrangeArms
 		if (limb.GetComponent<TourniquetScript>() != null) flags |= 32;
 		SplintLimb splint = limb.GetComponent<SplintLimb>();
 		if (splint != null && splint.item == "carcasssplint") flags |= 64;
-		NetIo.Put(writer, flags);
-		NetIo.Put(writer, (byte)Mathf.Clamp(limb.shrapnel, 0, 255));
-		NetIo.Put(writer, limb.skinHealth);
-		NetIo.Put(writer, limb.muscleHealth);
-		NetIo.Put(writer, limb.bleedAmount);
-		NetIo.Put(writer, limb.pain);
-		NetIo.Put(writer, limb.infectionAmount);
-		NetIo.Put(writer, limb.broken ? Mathf.Max(limb.boneHealTimer, 0.01f) : 0f);
-		NetIo.Put(writer, limb.dislocated ? Mathf.Max(limb.dislocationTimer, 0.01f) : 0f);
-		NetIo.Put(writer, limb.furBloodAmount);
-		NetIo.Put(writer, (ushort)Mathf.Clamp(limb.disinfectionTime, 0f, ushort.MaxValue));
+		writer.Put(flags);
+		writer.Put((byte)Mathf.Clamp(limb.shrapnel, 0, 255));
+		writer.Put(limb.skinHealth);
+		writer.Put(limb.muscleHealth);
+		writer.Put(limb.bleedAmount);
+		writer.Put(limb.pain);
+		writer.Put(limb.infectionAmount);
+		writer.Put(limb.broken ? Mathf.Max(limb.boneHealTimer, 0.01f) : 0f);
+		writer.Put(limb.dislocated ? Mathf.Max(limb.dislocationTimer, 0.01f) : 0f);
+		writer.Put(limb.furBloodAmount);
+		writer.Put((ushort)Mathf.Clamp(limb.disinfectionTime, 0f, ushort.MaxValue));
 	}
 
 	static void OnExtraLimbs(NetDataReader reader)

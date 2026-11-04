@@ -35,14 +35,14 @@ internal static class TraderMp
 	static void Send(ushort id, knetid client)
 	{
 		var writer = Multiplayer.CreateNamedWriter(SkinMsg);
-		NetIo.Put(writer, id);
+		writer.Put(id);
 		NetIo.ServerSend(writer, client);
 	}
 
 	static void Broadcast(ushort id)
 	{
 		var writer = Multiplayer.CreateNamedWriter(SkinMsg);
-		NetIo.Put(writer, id);
+		writer.Put(id);
 		NetIo.ServerSend(writer, ServerMain.AllClientIdsExceptHost);
 	}
 

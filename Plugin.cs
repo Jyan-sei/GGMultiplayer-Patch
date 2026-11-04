@@ -10,12 +10,16 @@ namespace GunsawGenetics;
 [BepInDependency("GunsawGenetics", BepInDependency.DependencyFlags.HardDependency)]
 [BepInDependency("CasualtiesMP", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("spritereplacer", BepInDependency.DependencyFlags.SoftDependency)]
+[BepInDependency("noah.casualtiesunknown.multiplayerspritereplacer", BepInDependency.DependencyFlags.SoftDependency)]
 public sealed class MPBridgePlugin : BaseUnityPlugin
 {
 	internal static MPBridgePlugin Instance;
 	internal static ManualLogSource Log;
 
-	void Awake()
+	internal static bool usingMSR;
+
+
+    void Awake()
 	{
 		Instance = this;
 		Log = Logger;
@@ -35,7 +39,8 @@ public sealed class MPBridgePlugin : BaseUnityPlugin
 
 		SpeciesMultiplayerSync.Initialize();
 		GgSpecies.NoteReplacer();
-		Log.LogInfo(
+		TalkPatch.Initialize();
+        Log.LogInfo(
 			$"[GG-MP] Bridge attached to CasualtiesMP v{togetherVer} " +
 			$"(ggmpcompat v{PluginInfo.Version}; GUID supersedes stock Krok bridge 1.0.0)");
 	}
@@ -51,7 +56,10 @@ public sealed class MPBridgePlugin : BaseUnityPlugin
 	{
 		if (!Chainloader.PluginInfos.ContainsKey("CasualtiesMP"))
 			return;
-		SpeciesMultiplayerSync.RefreshSprites();
+		if (!usingMSR)
+		{
+			SpeciesMultiplayerSync.RefreshSprites();
+		}
 		SpeciesContext.Tick();
 		TraderMp.TickPending();
 	}

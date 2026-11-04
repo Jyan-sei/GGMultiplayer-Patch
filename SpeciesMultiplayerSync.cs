@@ -17,10 +17,10 @@ public static partial class SpeciesMultiplayerSync
 	const string GateMsg = "GG.Species.Gate";
 	const string GateAskMsg = "GG.Species.GateAsk";
 
-	static readonly Dictionary<ushort, string> knownSpeciesNames = new Dictionary<ushort, string>();
-	static readonly Dictionary<ushort, int> knownSlots = new Dictionary<ushort, int>();
-	static readonly HashSet<string> _offeredPick = new HashSet<string>();
-	static readonly HashSet<int> _tutorialOffered = new HashSet<int>();
+	internal static readonly Dictionary<ushort, string> knownSpeciesNames = new Dictionary<ushort, string>();
+    internal static readonly Dictionary<ushort, int> knownSlots = new Dictionary<ushort, int>();
+    internal static readonly HashSet<string> _offeredPick = new HashSet<string>();
+    internal static readonly HashSet<int> _tutorialOffered = new HashSet<int>();
 	static int _runWorldId;
 	static int _tutorialWorldId;
 
@@ -107,8 +107,8 @@ public static partial class SpeciesMultiplayerSync
 			$"[GG-MP] BroadcastLocalPick - PickRequest netId={netId.id} species={speciesName} slot={spriteSlot}");
 		RecordKnownSpecies(netId, speciesName, spriteSlot);
 		var writer = Multiplayer.CreateNamedWriter(PickRequestMsg);
-		NetIo.Put(writer, speciesName);
-		NetIo.Put(writer, spriteSlot);
+		writer.Put(speciesName);
+		writer.Put(spriteSlot);
 		NetIo.ClientSend(writer);
 	}
 
@@ -151,7 +151,7 @@ public static partial class SpeciesMultiplayerSync
 				continue;
 			try
 			{
-				GgSpecies.SetSpriteSlot(body, kv.Value);
+				GgSpecies.SetSpriteSlot(body, kv.Value, kv.Key);
 			}
 			catch (System.Exception e)
 			{
@@ -307,9 +307,9 @@ public static partial class SpeciesMultiplayerSync
 	static void SendGate(ScavPlayer plr, bool locked, string species, int slot)
 	{
 		var writer = Multiplayer.CreateNamedWriter(GateMsg);
-		NetIo.Put(writer, locked ? 1 : 0);
-		NetIo.Put(writer, species ?? "");
-		NetIo.Put(writer, slot);
+		writer.Put(locked ? 1 : 0);
+		writer.Put(species ?? "");
+		writer.Put(slot);
 		NetIo.ServerSend(writer, plr.playerId);
 		MPBridgePlugin.Log?.LogInfo(
 			$"[GG-MP] gate {(locked ? "locked " + species : "pick")} -> {plr.playerName}");
@@ -395,10 +395,10 @@ public static partial class SpeciesMultiplayerSync
 		if (!Net.IsServer)
 			return;
 		var writer = Multiplayer.CreateNamedWriter(PickBroadcastMsg);
-		NetIo.Put(writer, netId.id);
-		NetIo.Put(writer, species);
-		NetIo.Put(writer, slot);
-		NetIo.Put(writer, writeStats);
+		writer.Put(netId.id);
+		writer.Put(species);
+		writer.Put(slot);
+		writer.Put(writeStats);
 		NetIo.ServerSend(writer, ServerMain.AllClientIdsExceptHost);
 	}
 
@@ -430,12 +430,12 @@ public static partial class SpeciesMultiplayerSync
 			return;
 
 		var writer = Multiplayer.CreateNamedWriter(CatchupMsg);
-		NetIo.Put(writer, knownSpeciesNames.Count);
+		writer.Put(knownSpeciesNames.Count);
 		foreach (var kv in knownSpeciesNames)
 		{
-			NetIo.Put(writer, kv.Key);
-			NetIo.Put(writer, kv.Value);
-			NetIo.Put(writer, knownSlots.TryGetValue(kv.Key, out int slot) ? slot : 0);
+			writer.Put(kv.Key);
+			writer.Put(kv.Value);
+			writer.Put(knownSlots.TryGetValue(kv.Key, out int slot) ? slot : 0);
 		}
 		NetIo.ServerSend(writer, plr.playerId);
 		MPBridgePlugin.Log?.LogInfo(
@@ -534,7 +534,7 @@ public static partial class SpeciesMultiplayerSync
 			return false;
 		try
 		{
-			GgSpecies.SetSpriteSlot(body, slot);
+			GgSpecies.SetSpriteSlot(body, slot, netId);
 		}
 		catch (System.Exception e)
 		{
